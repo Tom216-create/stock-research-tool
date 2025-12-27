@@ -22,6 +22,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            variant.assembleProvider.get().doLast {
+                def projectRoot = project.rootDir.parent
+                copy {
+                    from output.outputFile
+                    into projectRoot
+                    rename { String fileName ->
+                        "StockResearchTool-${variant.name}.apk"
+                    }
+                }
+                println "APK copied to: ${projectRoot}/StockResearchTool-${variant.name}.apk"
+            }
+        }
+    }
 }
 
 
