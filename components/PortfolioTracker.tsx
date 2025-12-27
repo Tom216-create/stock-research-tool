@@ -27,6 +27,8 @@ export default function PortfolioTracker() {
     const [newCost, setNewCost] = useState("");
     const [isAdding, setIsAdding] = useState(false);
 
+    const [isLoaded, setIsLoaded] = useState(false);
+
     // Load from local storage
     useEffect(() => {
         const saved = localStorage.getItem("my_holdings");
@@ -37,12 +39,15 @@ export default function PortfolioTracker() {
                 console.error("Failed to parse holdings", e);
             }
         }
+        setIsLoaded(true);
     }, []);
 
     // Save to local storage
     useEffect(() => {
-        localStorage.setItem("my_holdings", JSON.stringify(holdings));
-    }, [holdings]);
+        if (isLoaded) {
+            localStorage.setItem("my_holdings", JSON.stringify(holdings));
+        }
+    }, [holdings, isLoaded]);
 
     // Fetch prices
     // eslint-disable-next-line react-hooks/exhaustive-deps
