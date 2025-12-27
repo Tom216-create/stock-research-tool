@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     androidScheme: 'https',
-    url: 'http://10.0.2.2:3000', // Points to dev server from Android Emulator
+    url: 'https://stock-research-tool.vercel.app/', // Points to dev server from Android Emulator
     cleartext: true              // Allows HTTP for development
   }
 };
