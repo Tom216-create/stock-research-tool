@@ -27,7 +27,7 @@ export default function PortfolioTracker() {
     const [newCost, setNewCost] = useState("");
     const [isAdding, setIsAdding] = useState(false);
 
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [error, setError] = useState("");
 
     // Load from local storage
     useEffect(() => {
@@ -79,24 +79,29 @@ export default function PortfolioTracker() {
         }
     }, [holdings.length]); // Only refetch if number of holdings changes, simplistic but avoids loops
 
-    const addHolding = () => {
-        if (!newSymbol || !newShares || !newCost) return;
+    const addHolding = (e?: React.FormEvent) => {
+        e?.preventDefault(); // Prevent Reload
+        setError("");
+
+        if (!newSymbol || !newShares || !newCost) {
+            setError("All fields are required");
+            return;
+        }
 
         const symbol = newSymbol.toUpperCase();
         const shares = parseFloat(newShares);
         const avgCost = parseFloat(newCost);
 
-        if (isNaN(shares) || isNaN(avgCost)) return;
+        if (isNaN(shares) || isNaN(avgCost)) {
+            setError("Shares and Cost must be numbers");
+            return;
+        }
 
         // Check if exists, update or add
         const existingIndex = holdings.findIndex(h => h.symbol === symbol);
         const newHoldings = [...holdings];
 
         if (existingIndex >= 0) {
-            // Update logic (weighted average could go here, but simple replace for now or add shares?)
-            // Let's keep it simple: Replace for now, or maybe they want to add a separate lot.
-            // Requirement says "Enter and track", implies simple list. 
-            // Let's just append or replace. Replacing is safer for MVP to avoid duplicate keys.
             newHoldings[existingIndex] = { symbol, shares, avgCost };
         } else {
             newHoldings.push({ symbol, shares, avgCost });
@@ -107,9 +112,6 @@ export default function PortfolioTracker() {
         setNewShares("");
         setNewCost("");
         setIsAdding(false);
-
-        // Trigger fetch for new symbol
-        // (Effect will handle it)
     };
 
     const removeHolding = (symbol: string) => {
@@ -153,7 +155,10 @@ export default function PortfolioTracker() {
             {/* Controls */}
             <div className="flex justify-between items-center mb-4">
                 <button
-                    onClick={() => setIsAdding(!isAdding)}
+                    onClick={() => {
+                        setIsAdding(!isAdding);
+                        setError("");
+                    }}
                     className="flex items-center gap-2 px-3 py-1.5 bg-neon-blue/10 text-neon-blue rounded-lg hover:bg-neon-blue/20 transition-colors text-sm font-medium"
                 >
                     <Plus className="w-4 h-4" /> Add Stock
@@ -171,7 +176,11 @@ export default function PortfolioTracker() {
 
             {/* Add Form */}
             {isAdding && (
-                <div className="mb-4 p-4 bg-slate-800/50 rounded-xl flex flex-wrap gap-3 items-end animate-in fade-in slide-in-from-top-2">
+                <form
+                    onSubmit={addHolding}
+                    className="mb-4 p-4 bg-slate-800/50 rounded-xl flex flex-wrap gap-3 items-end animate-in fade-in slide-in-from-top-2"
+                >
+                    {error && <div className="w-full text-neon-red text-xs mb-2">{error}</div>}
                     <div className="flex-1 min-w-[120px]">
                         <label className="text-xs text-slate-400 block mb-1">Ticker</label>
                         <input
@@ -203,12 +212,12 @@ export default function PortfolioTracker() {
                         />
                     </div>
                     <button
-                        onClick={addHolding}
+                        type="submit"
                         className="px-4 py-1.5 bg-neon-green text-black font-semibold rounded text-sm hover:bg-neon-green/90 transition-colors"
                     >
                         Save
                     </button>
-                </div>
+                </form>
             )}
 
             {/* Holdings Table */}
