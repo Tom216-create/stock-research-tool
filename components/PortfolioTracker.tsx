@@ -28,6 +28,7 @@ export default function PortfolioTracker() {
     const [isAdding, setIsAdding] = useState(false);
 
     const [error, setError] = useState("");
+    const [isLoaded, setIsLoaded] = useState(false);
 
     // Load from local storage
     useEffect(() => {
